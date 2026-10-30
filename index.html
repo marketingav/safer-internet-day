@@ -1,0 +1,486 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Quiz Cyber-Famille</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Mono:wght@500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Concept : la porte du frigo familial. Une question à la fois, un post-it jaune pour la réaction, un cadenas qui se remplit. */
+:root {
+  --bg: #E8EFEC;
+  --surface: #FFFFFF;
+  --ink: #14262B;
+  --muted: #4F6469;
+  --line: #C3D1CE;
+  --accent: #2D4BFF;
+  --on-accent: #FFFFFF;
+  --note: #FFE066;
+  --on-note: #14262B;
+  --good: #14804F;
+  --good-bg: #DDF3E8;
+  --warn: #C98400;
+  --bad: #D03A2A;
+  --f-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --f-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1A1E; --surface: #162830; --ink: #E8F1EF; --muted: #9FB4B4; --line: #2C444C;
+    --accent: #8CA0FF; --on-accent: #0E1A1E; --note: #F2CF4A; --on-note: #14262B;
+    --good: #5FD39B; --good-bg: #153A2B; --warn: #F0B53A; --bad: #FF7A68;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1A1E; --surface: #162830; --ink: #E8F1EF; --muted: #9FB4B4; --line: #2C444C;
+  --accent: #8CA0FF; --on-accent: #0E1A1E; --note: #F2CF4A; --on-note: #14262B;
+  --good: #5FD39B; --good-bg: #153A2B; --warn: #F0B53A; --bad: #FF7A68;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 1rem/1.55 var(--f-body);
+  padding-block: 2rem 3rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.page { max-width: 40rem; margin-inline: auto; display: grid; gap: 1.5rem; }
+.page > * { min-width: 0; }
+
+.eyebrow, .tag, .count {
+  font: 500 0.75rem/1.2 var(--f-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.05; }
+h1 { font-size: clamp(2.1rem, 8vw, 3.4rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.4rem, 5vw, 1.85rem); font-weight: 800; letter-spacing: -0.01em; line-height: 1.15; }
+h3 { font-size: 1.1rem; font-weight: 600; }
+p { margin: 0; }
+.lead { font-size: 1.1rem; color: var(--muted); max-width: 34rem; }
+
+.btn {
+  font: 700 1rem/1.2 var(--f-body);
+  background: var(--accent);
+  color: var(--on-accent);
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 0.9rem 1.4rem;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.btn.ghost { background: var(--surface); color: var(--ink); }
+.btn:focus-visible, .opt:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+/* Intro */
+.facts { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.fact {
+  flex: 1 1 9rem; background: var(--surface); border: 2px solid var(--line);
+  border-radius: 12px; padding: 0.8rem 1rem;
+}
+.fact b { display: block; font: 800 1.6rem/1 var(--f-display); }
+.fact span { font-size: 0.85rem; color: var(--muted); }
+.fine { font-size: 0.85rem; color: var(--muted); }
+
+/* Quiz */
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.6rem; }
+.magnets { display: flex; gap: 0.35rem; }
+.magnets i {
+  width: 1rem; height: 1rem; border-radius: 50%;
+  border: 2px solid var(--line); background: transparent; display: block;
+}
+.magnets i.done { background: var(--accent); border-color: var(--accent); }
+.magnets i.now { border-color: var(--ink); }
+
+.card {
+  background: var(--surface); border: 2px solid var(--ink); border-radius: 16px;
+  padding: 1.25rem; display: grid; gap: 1rem;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.opts { display: grid; gap: 0.6rem; }
+.opt {
+  display: flex; gap: 0.8rem; align-items: flex-start; text-align: left;
+  width: 100%; font: 500 1rem/1.4 var(--f-body); color: var(--ink);
+  background: var(--bg); border: 2px solid var(--line); border-radius: 12px;
+  padding: 0.75rem 0.85rem; cursor: pointer;
+  transition: border-color 0.12s, transform 0.12s;
+}
+.opt:hover:not(:disabled) { border-color: var(--ink); transform: translateX(2px); }
+.opt:disabled { cursor: default; }
+.opt .k {
+  flex: none; width: 1.7rem; height: 1.7rem; border-radius: 8px;
+  display: grid; place-items: center; font: 500 0.8rem/1 var(--f-mono);
+  background: var(--surface); border: 2px solid var(--line);
+}
+.opt .txt { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+.opt .badge { flex: none; font: 500 0.7rem/1.2 var(--f-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--good); align-self: center; }
+.opt.chosen { border-color: var(--ink); background: var(--surface); }
+.opt.chosen .k { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.opt.best { border-color: var(--good); background: var(--good-bg); }
+.opt.faded { opacity: 0.6; }
+
+.note {
+  background: var(--note); color: var(--on-note); border-radius: 6px;
+  padding: 1rem 1.1rem 1.1rem; display: grid; gap: 0.45rem;
+  transform: rotate(-0.6deg); box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+  animation: stick 0.25s ease-out;
+}
+.note .react { font: 800 1.2rem/1.2 var(--f-display); }
+.note .pts { font: 500 0.75rem/1.2 var(--f-mono); text-transform: uppercase; letter-spacing: 0.08em; }
+.note p { font-size: 0.95rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+@keyframes stick { from { transform: rotate(-3deg) scale(0.96); opacity: 0; } to { transform: rotate(-0.6deg) scale(1); opacity: 1; } }
+.qwrap { animation: slide 0.25s ease-out; }
+@keyframes slide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Résultat */
+.score { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+.score b { font: 800 clamp(4rem, 18vw, 6.5rem)/0.9 var(--f-display); letter-spacing: -0.03em; }
+.score span { font: 600 1.4rem/1 var(--f-display); color: var(--muted); }
+.meter { height: 1.1rem; border-radius: 99px; background: var(--line); border: 2px solid var(--ink); overflow: hidden; }
+.meter i { display: block; height: 100%; width: 0; background: var(--tier, var(--accent)); transition: width 0.9s cubic-bezier(.2,.8,.2,1); }
+.scale { display: flex; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; font: 500 0.7rem/1.2 var(--f-mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.fix { display: grid; gap: 0.7rem; padding: 0; margin: 0; list-style: none; }
+.fix li { background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 0.9rem 1rem; display: grid; gap: 0.3rem; }
+.fix .tag { color: var(--bad); }
+.fix p { font-size: 0.95rem; }
+.copied { font-size: 0.9rem; color: var(--muted); min-height: 1.4em; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<main class="page">
+
+  <section id="intro" class="page" style="padding:0">
+    <p class="eyebrow">Quiz gratuit · 10 questions · 3 minutes</p>
+    <h1>Votre famille est-elle bien protégée en ligne ?</h1>
+    <p class="lead">Mot de passe du Wi-Fi, SMS de colis suspects, photos de Mamie en slip de bain : on teste tout, avec le sourire. Répondez franchement, personne ne vous regarde (sauf peut-être la caméra du frigo connecté).</p>
+    <div class="facts">
+      <div class="fact"><b>10</b><span>questions de la vraie vie</span></div>
+      <div class="fact"><b>30</b><span>points pour le titre de forteresse</span></div>
+      <div class="fact"><b>0 €</b><span>et rien n'est envoyé : vos réponses restent sur cet écran</span></div>
+    </div>
+    <div class="actions"><button class="btn" id="start" type="button">Lancer le quiz</button></div>
+    <p class="fine">Un jeu de sensibilisation, pas un audit de sécurité.</p>
+  </section>
+
+  <section id="quiz" class="page" style="padding:0" hidden>
+    <div class="top">
+      <span class="count" id="count">Question 1 / 10</span>
+      <div class="magnets" id="magnets" aria-hidden="true"></div>
+    </div>
+    <div class="card qwrap" id="qcard">
+      <span class="tag" id="qlabel"></span>
+      <h2 id="qtext"></h2>
+      <div class="opts" id="opts"></div>
+    </div>
+    <div id="feedback" aria-live="polite"></div>
+  </section>
+
+  <section id="result" class="page" style="padding:0" hidden>
+    <p class="eyebrow">Votre verdict</p>
+    <div class="score"><b id="rscore">0</b><span>/ 30</span></div>
+    <h1 id="rtitle"></h1>
+    <p class="lead" id="rdesc"></p>
+    <div>
+      <div class="meter" role="img" aria-label="Jauge de sécurité"><i id="rbar"></i></div>
+      <div class="scale" style="margin-top:0.4rem"><span>Open bar</span><span>Cadenas</span><span>Verrou</span><span>Forteresse</span></div>
+    </div>
+    <h2 id="fixtitle">À régler en premier</h2>
+    <ul class="fix" id="fixlist"></ul>
+    <div class="actions">
+      <button class="btn" id="copy" type="button">Copier mon résultat</button>
+      <button class="btn ghost" id="again" type="button">Refaire le quiz</button>
+    </div>
+    <p class="copied" id="copied" aria-live="polite"></p>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  var Q = [
+    { label: "Le Wi-Fi", q: "Le mot de passe du Wi-Fi de la maison, c'est…",
+      opts: [
+        { t: "Celui d'origine, collé sous la box depuis 2017.", s: 1 },
+        { t: "Le prénom du chat suivi de 123. Le chat est très fier.", s: 0 },
+        { t: "Une longue phrase absurde que seuls les adultes connaissent, avec un réseau invité pour les visiteurs.", s: 3 },
+        { t: "Connu de tout l'immeuble : on a même fait un barbecue ensemble.", s: 0 }
+      ],
+      tip: "Remplacez le mot de passe de la box et du Wi-Fi par une phrase longue (quatre mots ou plus). Activez un réseau invité pour les visiteurs et les objets connectés." },
+    { label: "Mots de passe", q: "Vos mots de passe, c'est plutôt…",
+      opts: [
+        { t: "Un seul, partout. C'est plus pratique, et on ne l'oublie jamais.", s: 0 },
+        { t: "Un carnet dans le tiroir de l'entrée, avec une jolie couverture.", s: 1 },
+        { t: "Un gestionnaire de mots de passe : on n'en retient qu'un seul.", s: 3 },
+        { t: "Le même, avec un chiffre en plus pour chaque site. C'est de la stratégie.", s: 1 }
+      ],
+      tip: "Un mot de passe unique par compte, grâce à un gestionnaire de mots de passe (plusieurs offres familles existent). Vous n'avez plus qu'une seule phrase à retenir." },
+    { label: "Double authentification", q: "La double authentification (le code envoyé en plus du mot de passe), vous en pensez quoi ?",
+      opts: [
+        { t: "On l'a activée sur la messagerie, la banque et les réseaux sociaux.", s: 3 },
+        { t: "C'est un truc de hackers, non ?", s: 0 },
+        { t: "Sur un compte ou deux, puis la flemme a gagné.", s: 1 },
+        { t: "Sur l'essentiel, mais le code arrive toujours quand le téléphone est à l'autre bout de la maison.", s: 2 }
+      ],
+      tip: "Activez la double authentification d'abord sur la messagerie, la banque et les réseaux sociaux. Quand c'est possible, préférez une appli d'authentification au SMS." },
+    { label: "Mises à jour", q: "Les mises à jour des appareils, c'est…",
+      opts: [
+        { t: "Un bouton « Me le rappeler demain » que l'on clique depuis huit mois.", s: 0 },
+        { t: "Automatique partout, même sur la box et la télé. On ne s'en occupe plus.", s: 3 },
+        { t: "Quand l'appareil menace de ne plus s'allumer.", s: 1 },
+        { t: "Automatique, sauf le vieil ordi du grenier qui « marche très bien comme ça ».", s: 2 }
+      ],
+      tip: "Activez les mises à jour automatiques partout, y compris sur la box, la télé et le vieil ordinateur. Un appareil qui n'est plus mis à jour mérite sa retraite." },
+    { label: "SMS suspects", q: "SMS reçu : « Votre colis est bloqué, réglez 1,99 € pour le débloquer ». Le réflexe familial ?",
+      opts: [
+        { t: "On clique vite, justement on attend un colis. Et 1,99 €, ça va.", s: 0 },
+        { t: "On vérifie le suivi dans l'appli du transporteur, pas via le lien.", s: 2 },
+        { t: "On le transfère au groupe famille avec « c'est normal ? ». Papy répond « oui ».", s: 1 },
+        { t: "On ne clique pas, on signale au 33700 et on supprime.", s: 3 }
+      ],
+      tip: "Ne cliquez jamais sur un lien reçu par SMS pour un colis ou un remboursement. Transférez le message au 33700 (le service officiel de signalement), puis supprimez-le." },
+    { label: "Les enfants", q: "Côté enfants, tablettes et jeux vidéo : quelle est la situation ?",
+      opts: [
+        { t: "Contrôle parental activé, et on discute régulièrement de ce qu'ils voient en ligne.", s: 3 },
+        { t: "Le contrôle parental ? Ils le contourneraient avant le dessert.", s: 0 },
+        { t: "Installé, puis désactivé après une négociation digne d'un sommet diplomatique.", s: 1 },
+        { t: "Activé, mais sans explication. Motif officiel : « parce que ».", s: 2 }
+      ],
+      tip: "Activez le contrôle parental sur chaque appareil et expliquez pourquoi. Un enfant qui sait à qui parler en cas de souci en ligne vaut mieux que n'importe quel filtre." },
+    { label: "Photos en ligne", q: "Les photos des enfants (et de Tonton au karaoké) publiées en ligne :",
+      opts: [
+        { t: "Publiques, avec la rue de l'école bien visible. Pour la déco.", s: 0 },
+        { t: "Dans le groupe famille… qui compte 14 cousins éloignés et un inconnu.", s: 2 },
+        { t: "Sur le profil, sans réglage particulier. On verra plus tard.", s: 1 },
+        { t: "Cercle restreint, géolocalisation coupée, et l'enfant a son mot à dire.", s: 3 }
+      ],
+      tip: "Réglez vos comptes en privé, coupez la géolocalisation des photos et évitez les uniformes, écoles et rues reconnaissables. Demandez l'avis de l'enfant avant de publier." },
+    { label: "Sauvegardes", q: "Et si le téléphone de la famille prenait un bain dans les toilettes ?",
+      opts: [
+        { t: "Tout est sur ce téléphone. Il a déjà fait un plongeon. On a prié.", s: 0 },
+        { t: "Sauvegarde dans le cloud et sur un disque externe, tout est à jour.", s: 3 },
+        { t: "Un disque dur externe, branché une fois en 2022.", s: 1 },
+        { t: "Dans le cloud, on croit. On n'a jamais vérifié.", s: 2 }
+      ],
+      tip: "Appliquez la règle 3-2-1 : trois copies, sur deux supports différents, dont une hors de la maison. Testez une restauration une fois par an." },
+    { label: "Wi-Fi public", q: "À la gare ou à l'hôtel, un Wi-Fi gratuit apparaît. Vous…",
+      opts: [
+        { t: "Vous connectez à « Free_WiFi_Gratuit_Vraiment » et faites un virement.", s: 0 },
+        { t: "L'évitez, mais le forfait de 2 Go ne tient pas jusqu'à mardi.", s: 1 },
+        { t: "Utilisez vos données mobiles (ou un VPN fiable) pour tout ce qui est sensible.", s: 3 },
+        { t: "Vous connectez, mais sans banque ni achats : juste les vidéos de chats.", s: 2 }
+      ],
+      tip: "Sur un Wi-Fi public, évitez la banque et les achats ; préférez vos données mobiles ou un VPN fiable. Désactivez la connexion automatique aux réseaux ouverts." },
+    { label: "Appels frauduleux", q: "Un appel : « Bonjour, c'est votre banque, il faut sécuriser votre compte, donnez-moi le code reçu par SMS ». Vous…",
+      opts: [
+        { t: "Donnez le code. Il avait une voix si rassurante.", s: 0 },
+        { t: "Raccrochez, rappelez le numéro officiel de la banque, et la famille a un mot de passe secret pour les vraies urgences.", s: 3 },
+        { t: "Restez poliment en ligne 40 minutes, au cas où.", s: 1 },
+        { t: "Raccrochez tout de suite, mais avec un petit coup de stress.", s: 2 }
+      ],
+      tip: "Aucune banque ne demande un code reçu par SMS, ni un virement « de sécurité », par téléphone. Raccrochez, rappelez le numéro officiel, et choisissez un mot secret familial pour les vraies urgences." }
+  ];
+
+  var REACT = [
+    ["Aïe. Les arnaqueurs vous disent déjà merci.", "Ouch. Même le chat a honte.", "Un vrai cadeau de Noël pour les pirates."],
+    ["Pas terrible, mais la bonne volonté est là (et la flemme aussi).", "On sent l'intention. Il manque l'action."],
+    ["Presque ! Un petit effort et c'est parfait.", "Pas mal du tout, il reste un détail à régler."],
+    ["Chapeau, le bon réflexe !", "Les pirates passent leur chemin en soupirant."]
+  ];
+
+  var TIERS = [
+    { max: 9,  name: "Famille Open Bar", color: "var(--bad)",
+      desc: "Chez vous, la porte numérique est grande ouverte, avec un petit panneau « Servez-vous ». Bonne nouvelle : tout se corrige, et vite." },
+    { max: 17, name: "Famille Cadenas en plastique", color: "var(--warn)",
+      desc: "Il y a une serrure, c'est déjà ça. Mais un trombone et deux minutes de motivation suffisent pour la faire sauter." },
+    { max: 24, name: "Famille Verrou costaud", color: "var(--good)",
+      desc: "Solide, avec quelques trous dans la raquette. Quelques réglages ce week-end et vous passez en première division." },
+    { max: 30, name: "Famille Forteresse", color: "var(--good)",
+      desc: "Douves, pont-levis, et Papy qui reconnaît un faux SMS à trois kilomètres. Vous pouvez en parler fièrement au prochain repas." }
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var i = 0, answers = [], locked = false;
+
+  function show(id) {
+    ["intro", "quiz", "result"].forEach(function (s) { $(s).hidden = (s !== id); });
+    window.scrollTo(0, 0);
+  }
+
+  function magnets() {
+    var box = $("magnets");
+    box.textContent = "";
+    for (var n = 0; n < Q.length; n++) {
+      var m = document.createElement("i");
+      if (n < answers.length) m.className = "done";
+      else if (n === i) m.className = "now";
+      box.appendChild(m);
+    }
+  }
+
+  function renderQ() {
+    var q = Q[i];
+    locked = false;
+    $("count").textContent = "Question " + (i + 1) + " / " + Q.length;
+    $("qlabel").textContent = q.label;
+    $("qtext").textContent = q.q;
+    $("feedback").textContent = "";
+    var box = $("opts");
+    box.textContent = "";
+    q.opts.forEach(function (o, idx) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt";
+      b.id = "opt-" + idx;
+      var k = document.createElement("span");
+      k.className = "k";
+      k.textContent = "ABCD".charAt(idx);
+      var t = document.createElement("span");
+      t.className = "txt";
+      t.textContent = o.t;
+      b.appendChild(k);
+      b.appendChild(t);
+      b.addEventListener("click", function () { choose(idx); });
+      box.appendChild(b);
+    });
+    var card = $("qcard");
+    card.style.animation = "none";
+    void card.offsetWidth;
+    card.style.animation = "";
+    magnets();
+  }
+
+  function choose(idx) {
+    if (locked) return;
+    locked = true;
+    var q = Q[i], o = q.opts[idx];
+    answers.push({ idx: idx, s: o.s });
+    var btns = $("opts").querySelectorAll(".opt");
+    btns.forEach(function (b, n) {
+      b.disabled = true;
+      var isBest = q.opts[n].s === 3;
+      if (n === idx) b.classList.add("chosen");
+      if (isBest) {
+        b.classList.add("best");
+        var tag = document.createElement("span");
+        tag.className = "badge";
+        tag.textContent = "Idéal";
+        b.appendChild(tag);
+      }
+      if (n !== idx && !isBest) b.classList.add("faded");
+    });
+    magnets();
+
+    var pool = REACT[o.s];
+    var line = pool[i % pool.length];
+    var fb = $("feedback");
+    fb.textContent = "";
+    var note = document.createElement("div");
+    note.className = "note";
+    var r = document.createElement("div");
+    r.className = "react";
+    r.textContent = line;
+    var pts = document.createElement("div");
+    pts.className = "pts";
+    pts.textContent = "+" + o.s + " point" + (o.s > 1 ? "s" : "") + " sur 3";
+    var p = document.createElement("p");
+    p.textContent = q.tip;
+    note.appendChild(r);
+    note.appendChild(pts);
+    note.appendChild(p);
+    fb.appendChild(note);
+    var act = document.createElement("div");
+    act.className = "actions";
+    act.style.marginTop = "1rem";
+    var nx = document.createElement("button");
+    nx.type = "button";
+    nx.className = "btn";
+    nx.id = "next";
+    nx.textContent = (i === Q.length - 1) ? "Voir mon résultat" : "Question suivante";
+    nx.addEventListener("click", next);
+    act.appendChild(nx);
+    fb.appendChild(act);
+    nx.focus({ preventScroll: true });
+    nx.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  function next() {
+    if (i === Q.length - 1) { finish(); return; }
+    i++;
+    renderQ();
+    window.scrollTo(0, 0);
+  }
+
+  function total() { return answers.reduce(function (a, x) { return a + x.s; }, 0); }
+  function tierOf(sc) { for (var n = 0; n < TIERS.length; n++) if (sc <= TIERS[n].max) return TIERS[n]; return TIERS[3]; }
+
+  function finish() {
+    var sc = total(), tier = tierOf(sc);
+    show("result");
+    $("rscore").textContent = sc;
+    $("rtitle").textContent = tier.name;
+    $("rdesc").textContent = tier.desc;
+    var bar = $("rbar");
+    bar.style.setProperty("--tier", tier.color);
+    bar.style.width = "0";
+    setTimeout(function () { bar.style.width = Math.max(4, Math.round(sc / 30 * 100)) + "%"; }, 80);
+
+    var weak = answers.map(function (a, n) { return { n: n, s: a.s }; })
+      .filter(function (x) { return x.s <= 1; })
+      .sort(function (a, b) { return a.s - b.s || a.n - b.n; })
+      .slice(0, 3);
+    var list = $("fixlist");
+    list.textContent = "";
+    if (!weak.length) {
+      $("fixtitle").textContent = "Aucun point faible majeur";
+      var li0 = document.createElement("li");
+      var p0 = document.createElement("p");
+      p0.textContent = "Refaites le test dans six mois : les arnaques, elles, évoluent toutes seules.";
+      li0.appendChild(p0);
+      list.appendChild(li0);
+    } else {
+      $("fixtitle").textContent = "À régler en premier";
+      weak.forEach(function (w) {
+        var li = document.createElement("li");
+        var tg = document.createElement("span");
+        tg.className = "tag";
+        tg.textContent = Q[w.n].label;
+        var pp = document.createElement("p");
+        pp.textContent = Q[w.n].tip;
+        li.appendChild(tg);
+        li.appendChild(pp);
+        list.appendChild(li);
+      });
+    }
+    $("copied").textContent = "";
+  }
+
+  function reset() { i = 0; answers = []; locked = false; show("quiz"); renderQ(); }
+
+  $("start").addEventListener("click", reset);
+  $("again").addEventListener("click", reset);
+  $("copy").addEventListener("click", function () {
+    var sc = total();
+    var txt = "Ma famille a obtenu " + sc + "/30 au Quiz Cyber-Famille : « " + tierOf(sc).name + " ». Et la vôtre ?";
+    var out = $("copied");
+    var done = function () { out.textContent = "Copié. À coller dans le groupe famille."; };
+    var fail = function () { out.textContent = txt; };
+    try {
+      navigator.clipboard.writeText(txt).then(done, fail);
+    } catch (e) { fail(); }
+  });
+})();
+</script>
+
+</body></html>
